@@ -129,6 +129,7 @@ const Auth = () => {
       });
       const result = await response.json();
       if (response.ok) {
+        alert("Response Ok");
         if (isSignUp) {
           alert("Please Login with Credential Now to access Dashboard");
           setUserData({ name: "", email: "", password: "" });
@@ -145,6 +146,9 @@ const Auth = () => {
       } else if (response.status === 402) {
         alert(result.message);
       } else if (response.status === 404) {
+        alert(result.message);
+      } else if (response.status === 500) {
+        console.log(result.message);
         alert(result.message);
       }
     } catch (error) {
