@@ -6,7 +6,22 @@ import { BASE_API_URL } from "../../Api.config";
 const UpdateTask = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, logout, getAccessTokenSilently } = useAuth0();
+  const { user, logout, getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const [userName, setUsername] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("email");
+    const storedName = localStorage.getItem("name");
+    const storedToken = localStorage.getItem("token");
+
+    if (storedEmail && storedName) {
+      setUserEmail(storedEmail);
+      setUsername(storedName);
+      setToken(storedToken);
+    }
+  }, []);
 
   const [task, setTask] = useState({
     name: "",
@@ -18,8 +33,12 @@ const UpdateTask = () => {
   // Fetch the task details when the component mounts
   useEffect(() => {
     const fetchTaskDetails = async () => {
+      let token;
+      if (isAuthenticated) {
+        token = await getAccessTokenSilently();
+      }
+      token = localStorage.getItem("token");
       try {
-        const token = await getAccessTokenSilently();
         const res = await fetch(`${BASE_API_URL}/todo/task/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -50,10 +69,33 @@ const UpdateTask = () => {
     fetchTaskDetails();
   }, [id, getAccessTokenSilently]);
 
+  //handle logout
+
+  const handleLogout = () => {
+    localStorage.removeItem("email");
+    localStorage.removeItem("name");
+    localStorage.removeItem("token");
+    setUserEmail("");
+    setUsername("");
+    setToken("");
+    logout();
+  };
+
   // Update task function
   const updateTask = async () => {
+    let token;
+    if (isAuthenticated) {
+      token = await getAccessTokenSilently(); // Get access token
+    } else {
+      token = localStorage.getItem("token");
+    }
     try {
-      const token = await getAccessTokenSilently(); // Get access token
+      let token;
+      if (isAuthenticated) {
+        token = await getAccessTokenSilently(); // Get access token
+      } else {
+        token = localStorage.getItem("token");
+      }
       const response = await fetch(`${BASE_API_URL}/todo/task/${id}`, {
         method: "PATCH",
         headers: {
@@ -78,11 +120,11 @@ const UpdateTask = () => {
       {/* User Info Section */}
       <div className="w-full bg-white shadow-lg rounded-xl p-6 text-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
-          Welcome, {user?.name} 👋
+          Welcome, {user?.name ?? userName} 👋
         </h1>
-        <p className="text-gray-600">{user?.email}</p>
+        <p className="text-gray-600">{user?.email ?? userEmail}</p>
         <button
-          onClick={() => logout()}
+          onClick={handleLogout}
           className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md shadow hover:bg-red-600 transition"
         >
           Logout

@@ -44,6 +44,7 @@ const Auth = () => {
         }
 
         navigate("/dashboard"); // Redirect after login
+        isSignUp(false);
       } catch (error) {
         console.error("Error checking user in DB:", error);
       }
@@ -113,18 +114,37 @@ const Auth = () => {
   const handleAuth = async (e) => {
     e.preventDefault();
     const endpoint = isSignUp ? "register" : "login";
+    const requestBody = isSignUp
+      ? {
+          name: userData.name,
+          email: userData.email,
+          password: userData.password,
+        }
+      : { email: userData.email, password: userData.password };
     try {
       const response = await fetch(`${BASE_API_URL}/todo/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(requestBody),
       });
       const result = await response.json();
       if (response.ok) {
-        navigate("/dashboard");
+        if (isSignUp) {
+          alert("Please Login with Credential Now to access Dashboard");
+          setUserData({ name: "", email: "", password: "" });
+          setIsSignUp(false); // Switch to login form
+        } else {
+          localStorage.setItem("token", result.token);
+          localStorage.setItem("email", result.user.email);
+          localStorage.setItem("name", result.user.name);
+          navigate("/dashboard");
+        }
+        // navigate("/");
       } else if (response.status === 400) {
         alert(result.message);
       } else if (response.status === 402) {
+        alert(result.message);
+      } else if (response.status === 404) {
         alert(result.message);
       }
     } catch (error) {
@@ -135,7 +155,7 @@ const Auth = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900 to-indigo-100 px-4">
       <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
-        <h2 className="text-3xl bg-orange-400 font-bold text-center text-gray-800 mb-6">
+        <h2 className="text-3xl  font-bold text-center text-gray-800 mb-6">
           {isSignUp ? "Sign Up" : "Log In"}
         </h2>
 

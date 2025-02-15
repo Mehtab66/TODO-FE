@@ -12,6 +12,34 @@ const Dashboard = () => {
   const [newStatus, setNewStatus] = useState("Pending");
   const [selectedTask, setSelectedTask] = useState(null);
   const navigate = useNavigate();
+  const [userName, setUsername] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [token, setToken] = useState("");
+  //get user info from localStorage
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("email");
+    const storedName = localStorage.getItem("name");
+    const storedToken = localStorage.getItem("token");
+
+    if (storedEmail && storedName) {
+      setUserEmail(storedEmail);
+      setUsername(storedName);
+      setToken(storedToken);
+    }
+  }, []);
+
+  //handle logout
+
+  const handleLogout = () => {
+    localStorage.removeItem("email");
+    localStorage.removeItem("name");
+    localStorage.removeItem("token");
+    setUserEmail("");
+    setUsername("");
+    setToken("");
+    logout();
+  };
+
   // Fetch user tasks from backend
   // useEffect(() => {
   //   if (isAuthenticated) {
@@ -24,40 +52,50 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
+      let token;
       if (isAuthenticated && user?.sub) {
-        const token = await getAccessTokenSilently(); // Replace with the actual token retrieval logic
-
-        try {
-          const res = await fetch(
-            `${BASE_API_URL}/todo/tasks?userId=${user.sub}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`, // Add the Authorization header with the token
-                "Content-Type": "application/json", // Ensure content type is correct (optional)
-              },
-            }
-          );
-
-          if (res.ok) {
-            const data = await res.json();
-            setTasks(data.tasks || []);
-          } else {
-            console.error("Error fetching tasks: ", res.statusText);
+        token = await getAccessTokenSilently(); // Replace with the actual token retrieval logic
+      } else {
+        token = localStorage.getItem("token");
+      }
+      try {
+        const res = await fetch(
+          ` ${BASE_API_URL}/todo/tasks?userId=${user?.email || userEmail}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the Authorization header with the token
+              "Content-Type": "application/json", // Ensure content type is correct (optional)
+            },
           }
-        } catch (error) {
-          console.error("Error fetching tasks: ", error);
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log(data);
+          setTasks(data.tasks || []);
+        } else {
+          console.error("Error fetching tasks: ", res.statusText);
         }
+      } catch (error) {
+        console.error("Error fetching tasks: ", error);
       }
     };
 
-    fetchTasks();
-  }, [isAuthenticated, user?.sub]);
+    const timeout = setTimeout(fetchTasks, 500);
+
+    return () => clearTimeout(timeout);
+  }, [isAuthenticated, user?.sub, userEmail]);
 
   // Add new task
   const addTask = async () => {
     if (!name.trim() || !newDescription.trim()) return;
-    const token = await getAccessTokenSilently();
+    let token;
+    if (isAuthenticated) {
+      token = await getAccessTokenSilently();
+    } else {
+      token = localStorage.getItem("token");
+    }
     const response = await fetch(`${BASE_API_URL}/todo/task`, {
       method: "POST",
       headers: {
@@ -65,7 +103,7 @@ const Dashboard = () => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        userId: user.sub,
+        userId: user?.email ?? userEmail,
         name: name,
         description: newDescription,
         status: newStatus,
@@ -80,7 +118,12 @@ const Dashboard = () => {
 
   // Delete a task
   const deleteTask = async (taskId) => {
-    const token = await getAccessTokenSilently();
+    let token;
+    if (isAuthenticated) {
+      token = await getAccessTokenSilently();
+    } else {
+      token = localStorage.getItem("token");
+    }
     await fetch(`${BASE_API_URL}/todo/task/${taskId}`, {
       method: "DELETE",
       headers: {
@@ -95,11 +138,11 @@ const Dashboard = () => {
       {/* User Info Section */}
       <div className="w-full bg-white shadow-lg rounded-xl p-6 text-center">
         <h1 className="text-2xl font-bold text-gray-800">
-          Welcome, {user?.name} 👋
+          Welcome, {user?.name ?? userName} 👋
         </h1>
-        <p className="text-gray-600">{user?.email}</p>
+        <p className="text-gray-600">{user?.email ?? userEmail}</p>
         <button
-          onClick={() => logout()}
+          onClick={handleLogout}
           className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md shadow hover:bg-red-600 transition"
         >
           Logout
