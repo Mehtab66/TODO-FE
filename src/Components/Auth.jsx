@@ -129,7 +129,6 @@ const Auth = () => {
       });
       const result = await response.json();
       if (response.ok) {
-        alert("Response Ok");
         if (isSignUp) {
           alert("Please Login with Credential Now to access Dashboard");
           setUserData({ name: "", email: "", password: "" });
