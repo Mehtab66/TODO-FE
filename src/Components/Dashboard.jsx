@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import UpdateTask from "./UpdateTask";
 import { useNavigate } from "react-router-dom";
+import { BASE_API_URL } from "../../Api.config";
 
 const Dashboard = () => {
   const { user, isAuthenticated, logout, getAccessTokenSilently } = useAuth0();
@@ -14,7 +15,7 @@ const Dashboard = () => {
   // Fetch user tasks from backend
   // useEffect(() => {
   //   if (isAuthenticated) {
-  //     fetch(`http://localhost:3000/todo/tasks?userId=${user.sub}`)
+  //     fetch(`${BASE_API_URL}/todo/tasks?userId=${user.sub}`)
   //       .then((res) => res.json())
   //       .then((data) => setTasks(data.tasks || []))
   //       .catch((error) => console.error("Error fetching tasks:", error));
@@ -28,7 +29,7 @@ const Dashboard = () => {
 
         try {
           const res = await fetch(
-            `http://localhost:3000/todo/tasks?userId=${user.sub}`,
+            `${BASE_API_URL}/todo/tasks?userId=${user.sub}`,
             {
               method: "GET",
               headers: {
@@ -57,7 +58,7 @@ const Dashboard = () => {
   const addTask = async () => {
     if (!name.trim() || !newDescription.trim()) return;
     const token = await getAccessTokenSilently();
-    const response = await fetch("http://localhost:3000/todo/task", {
+    const response = await fetch(`${BASE_API_URL}/todo/task`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -80,7 +81,7 @@ const Dashboard = () => {
   // Delete a task
   const deleteTask = async (taskId) => {
     const token = await getAccessTokenSilently();
-    await fetch(`http://localhost:3000/todo/task/${taskId}`, {
+    await fetch(`${BASE_API_URL}/todo/task/${taskId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

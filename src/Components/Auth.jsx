@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import { BASE_API_URL } from "../../Api.config";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -21,7 +22,7 @@ const Auth = () => {
     if (isAuthenticated && user) {
       try {
         const token = await getAccessTokenSilently();
-        const response = await fetch("http://localhost:3000/todo/users", {
+        const response = await fetch(`${BASE_API_URL}/todo/users`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -54,7 +55,7 @@ const Auth = () => {
     if (isSignUp) {
       // Handle sign-up logic here
       try {
-        const response = await fetch("http://localhost:3000/todo/signup", {
+        const response = await fetch(`${BASE_API_URL}/todo/signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -82,7 +83,7 @@ const Auth = () => {
       // Handle login logic here
       try {
         const token = await getAccessTokenSilently();
-        const response = await fetch("http://localhost:3000/todo/users", {
+        const response = await fetch(`${BASE_API_URL}/todo/users`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -113,7 +114,7 @@ const Auth = () => {
     e.preventDefault();
     const endpoint = isSignUp ? "register" : "login";
     try {
-      const response = await fetch(`http://localhost:3000/todo/${endpoint}`, {
+      const response = await fetch(`${BASE_API_URL}/todo/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),

@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Dashboard from "../Components/Dashboard";
 import { useAuth0 } from "@auth0/auth0-react";
 import { MemoryRouter } from "react-router-dom";
+import { BASE_API_URL } from "../../Api.config";
 
 // Mock useAuth0
 jest.mock("@auth0/auth0-react");
@@ -71,7 +72,7 @@ describe("Dashboard Component", () => {
 
     // Verify API call
     expect(fetch).toHaveBeenCalledWith(
-      "http://localhost:3000/todo/task",
+      `${BASE_API_URL}/todo/task`,
       expect.objectContaining({
         method: "POST",
       })
@@ -118,7 +119,7 @@ describe("Dashboard Component", () => {
 
     // Verify delete API call
     expect(fetch).toHaveBeenCalledWith(
-      "http://localhost:3000/todo/task/1",
+      `${BASE_API_URL}/todo/task/1`,
       expect.objectContaining({
         method: "DELETE",
       })
