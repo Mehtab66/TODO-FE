@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 import { BASE_API_URL } from "../../Api.config";
+import { toast } from "react-toastify";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -42,7 +43,7 @@ const Auth = () => {
         } else {
           console.log("User already exists:", data.user);
         }
-
+        toast.success("Logged in successfully");
         navigate("/dashboard"); // Redirect after login
         isSignUp(false);
       } catch (error) {
@@ -74,7 +75,7 @@ const Auth = () => {
 
         const data = await response.json();
         console.log("User signed up:", data);
-
+        toast.success("Signed up successfully");
         // Redirect after successful sign-up
         navigate("/dashboard");
       } catch (error) {
@@ -130,7 +131,9 @@ const Auth = () => {
       const result = await response.json();
       if (response.ok) {
         if (isSignUp) {
-          alert("Please Login with Credential Now to access Dashboard");
+          toast.update("Please Login with Credential Now to access Dashboard", {
+            type: "success",
+          });
           setUserData({ name: "", email: "", password: "" });
           setIsSignUp(false); // Switch to login form
         } else {
@@ -141,13 +144,13 @@ const Auth = () => {
         }
         // navigate("/");
       } else if (response.status === 400) {
-        alert(result.message);
+        toast.update(result.message, { type: "error" });
       } else if (response.status === 402) {
-        alert(result.message);
+        toast.update(result.message, { type: "error" });
       } else if (response.status === 404) {
-        alert(result.message);
+        toast.update(result.message, { type: "error" });
       } else if (response.status === 500) {
-        console.log(result.message);
+        toast.update(result.message, { type: "error" });
         alert(result.message);
       }
     } catch (error) {
