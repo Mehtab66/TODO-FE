@@ -160,8 +160,9 @@ const Auth = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900 to-indigo-100 px-4">
-      <p>Login/SignUp with Email nd Password Issue Fixed</p>
       <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md">
+        <p>Login/SignUp with Email nd Password Issue Fixed</p>
+
         <h2 className="text-3xl  font-bold text-center text-gray-800 mb-6">
           {isSignUp ? "Sign Up" : "Log In"}
         </h2>
